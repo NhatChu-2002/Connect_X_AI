@@ -1,5 +1,7 @@
 import numpy as np
 import random
+from kaggle_environments import evaluate, make, utils
+from random import choice
 
 def alphabeta_agent(obs, config, max_depth=4):
     board = np.array(obs.board).reshape(config.rows, config.columns)
@@ -136,3 +138,69 @@ def alphabeta_agent(obs, config, max_depth=4):
 
     best_action, _ = minimax(board, max_depth, -float('inf'), float('inf'), True)
     return best_action
+
+
+def block_check_agent(obs, config):
+
+    ROWS = config.rows
+    COLS = config.columns
+    INAROW = config.inarow
+    board = obs.board
+    player = obs.mark
+
+    def get_next_open_row(col):
+        for row in reversed(range(ROWS)):
+            idx = row * COLS + col
+            if board[idx] == 0:
+                return idx
+        return None
+
+    def drop_piece(b, col, player_mark):
+        b_copy = b.copy()
+        row_idx = get_next_open_row(col)
+        if row_idx is not None:
+            b_copy[row_idx] = player_mark
+            return b_copy
+        return None
+
+    def is_winning_move(b, mark):
+        # Check all directions for win
+        for row in range(ROWS):
+            for col in range(COLS):
+                idx = row * COLS + col
+                # Horizontal
+                if col + INAROW <= COLS:
+                    if all(b[row * COLS + col + i] == mark for i in range(INAROW)):
+                        return True
+                # Vertical
+                if row + INAROW <= ROWS:
+                    if all(b[(row + i) * COLS + col] == mark for i in range(INAROW)):
+                        return True
+                # Diagonal /
+                if row - INAROW + 1 >= 0 and col + INAROW <= COLS:
+                    if all(b[(row - i) * COLS + col + i] == mark for i in range(INAROW)):
+                        return True
+                # Diagonal \
+                if row + INAROW <= ROWS and col + INAROW <= COLS:
+                    if all(b[(row + i) * COLS + col + i] == mark for i in range(INAROW)):
+                        return True
+        return False
+
+    # Try to win
+    for col in range(COLS):
+        if get_next_open_row(col) is not None:
+            new_board = drop_piece(board, col, player)
+            if new_board and is_winning_move(new_board, player):
+                return col
+
+    # Try to block opponent
+    opponent = 1 if player == 2 else 2
+    for col in range(COLS):
+        if get_next_open_row(col) is not None:
+            new_board = drop_piece(board, col, opponent)
+            if new_board and is_winning_move(new_board, opponent):
+                return col
+
+    # Otherwise pick random valid column
+    valid_columns = [col for col in range(COLS) if get_next_open_row(col) is not None]
+    return random.choice(valid_columns)
