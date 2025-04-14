@@ -2,6 +2,55 @@ import numpy as np
 import random
 from kaggle_environments import evaluate, make, utils
 from random import choice
+from dueling_dql_model import DuelingDQNCNN
+from dql_model import DQNCNN
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+def create_dueling_dql_agent(model_path, input_shape=(1, 6, 7), n_actions=7):
+    model = DuelingDQNCNN(input_shape, n_actions)
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.eval()
+
+    def agent(obs, config):
+        board = np.array(obs['board']).reshape(1, config.rows, config.columns)
+        board_tensor = torch.tensor(board, dtype=torch.float32).unsqueeze(0)
+
+        with torch.no_grad():
+            q_values = model(board_tensor).squeeze()
+
+            # Mask invalid moves
+            for col in range(config.columns):
+                if obs['board'][col] != 0:
+                    q_values[col] = -float('inf')  # Mask full columns
+
+            action = int(torch.argmax(q_values).item())
+        return action
+
+    return agent
+
+def create_dql_agent(model_path, input_shape=(1, 6, 7), n_actions=7):
+    model = DQNCNN(input_shape, n_actions)
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.eval()
+
+    def agent(obs, config):
+        board = np.array(obs['board']).reshape(1, config.rows, config.columns)
+        board_tensor = torch.tensor(board, dtype=torch.float32).unsqueeze(0)
+
+        with torch.no_grad():
+            q_values = model(board_tensor).squeeze()
+
+            # Mask invalid moves
+            for col in range(config.columns):
+                if obs['board'][col] != 0:
+                    q_values[col] = -float('inf')  # Mask full columns
+
+            action = int(torch.argmax(q_values).item())
+        return action
+
+    return agent
 
 def alphabeta_agent(obs, config, max_depth=4):
     board = np.array(obs.board).reshape(config.rows, config.columns)
