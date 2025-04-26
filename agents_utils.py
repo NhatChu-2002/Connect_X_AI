@@ -23,7 +23,7 @@ def create_dueling_dql_agent(model_path, input_shape=(1, 6, 7), n_actions=7):
             # Mask invalid moves
             for col in range(config.columns):
                 if obs['board'][col] != 0:
-                    q_values[col] = -float('inf')  # Mask full columns
+                    q_values[col] = -float('inf')  
 
             action = int(torch.argmax(q_values).item())
         return action
@@ -45,7 +45,7 @@ def create_dql_agent(model_path, input_shape=(1, 6, 7), n_actions=7):
             # Mask invalid moves
             for col in range(config.columns):
                 if obs['board'][col] != 0:
-                    q_values[col] = -float('inf')  # Mask full columns
+                    q_values[col] = -float('inf')  
 
             action = int(torch.argmax(q_values).item())
         return action
@@ -100,13 +100,13 @@ def alphabeta_agent(obs, config, max_depth=4):
                 window = board[row:row+4, col]
                 score += score_window(window, player)
 
-        # Positive diagonal
+        #Diagonal \
         for row in range(config.rows - 3):
             for col in range(config.columns - 3):
                 window = [board[row+i][col+i] for i in range(4)]
                 score += score_window(np.array(window), player)
 
-        # Negative diagonal
+        #Diagonal /
         for row in range(3, config.rows):
             for col in range(config.columns - 3):
                 window = [board[row-i][col+i] for i in range(4)]
@@ -121,22 +121,22 @@ def alphabeta_agent(obs, config, max_depth=4):
         return [col for col in range(config.columns) if is_valid_action(board, col)]
 
     def check_win(board, player, config):
-        # Horizontal
+        #Horizontal
         for r in range(config.rows):
             for c in range(config.columns - 3):
                 if all(board[r, c+i] == player for i in range(4)):
                     return True
-        # Vertical
+        #Vertical
         for r in range(config.rows - 3):
             for c in range(config.columns):
                 if all(board[r+i, c] == player for i in range(4)):
                     return True
-        # Diagonal \
+        #Diagonal \
         for r in range(config.rows - 3):
             for c in range(config.columns - 3):
                 if all(board[r+i, c+i] == player for i in range(4)):
                     return True
-        # Diagonal /
+        #Diagonal /
         for r in range(3, config.rows):
             for c in range(config.columns - 3):
                 if all(board[r-i, c+i] == player for i in range(4)):
@@ -217,19 +217,19 @@ def block_check_agent(obs, config):
         for row in range(ROWS):
             for col in range(COLS):
                 idx = row * COLS + col
-                # Horizontal
+                #Horizontal
                 if col + INAROW <= COLS:
                     if all(b[row * COLS + col + i] == mark for i in range(INAROW)):
                         return True
-                # Vertical
+                #Vertical
                 if row + INAROW <= ROWS:
                     if all(b[(row + i) * COLS + col] == mark for i in range(INAROW)):
                         return True
-                # Diagonal /
+                #Diagonal /
                 if row - INAROW + 1 >= 0 and col + INAROW <= COLS:
                     if all(b[(row - i) * COLS + col + i] == mark for i in range(INAROW)):
                         return True
-                # Diagonal \
+                #Diagonal \
                 if row + INAROW <= ROWS and col + INAROW <= COLS:
                     if all(b[(row + i) * COLS + col + i] == mark for i in range(INAROW)):
                         return True
