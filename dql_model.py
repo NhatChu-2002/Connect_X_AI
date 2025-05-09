@@ -21,9 +21,9 @@ class DQNCNN(nn.Module):
         return int(np.prod(x.size()))
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))      # [B, 64, H-3, W-3]
-        x = F.relu(self.conv2(x))      # [B, 128, H-4, W-4]
-        x = x.view(x.size(0), -1)      # flatten
+        x = F.relu(self.conv1(x))     
+        x = F.relu(self.conv2(x))      
+        x = x.view(x.size(0), -1)      
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
         return self.fc2(x)    
