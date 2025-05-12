@@ -2,8 +2,8 @@ import numpy as np
 import random
 from kaggle_environments import evaluate, make, utils
 from random import choice
-from dueling_dql_model import DuelingDQNCNN
-from dql_model import DQNCNN
+from utils.dueling_dql_model import DuelingDQNCNN
+from utils.dql_model import DQNCNN
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -21,7 +21,6 @@ def create_dueling_dql_agent(model_path, input_shape=(1, 6, 7), n_actions=7):
         with torch.no_grad():
             q_values = model(board_tensor).squeeze()
 
-            # Mask invalid moves
             for col in range(config.columns):
                 if obs['board'][col] != 0:
                     q_values[col] = -float('inf')  
@@ -43,7 +42,6 @@ def create_dql_agent(model_path, input_shape=(1, 6, 7), n_actions=7):
         with torch.no_grad():
             q_values = model(board_tensor).squeeze()
 
-            # Mask invalid moves
             for col in range(config.columns):
                 if obs['board'][col] != 0:
                     q_values[col] = -float('inf')  
