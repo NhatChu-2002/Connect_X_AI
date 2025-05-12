@@ -5,7 +5,7 @@ import numpy as np
 class DQNCNN(nn.Module):
     def __init__(self, input_shape, n_actions):
         super(DQNCNN, self).__init__()
-        c, h, w = input_shape  # shape: (1, 6, 7)
+        c, h, w = input_shape 
         
         self.conv1 = nn.Conv2d(c, 64, kernel_size=4, stride=1)
         self.conv2 = nn.Conv2d(64, 128, kernel_size=2, stride=1)
